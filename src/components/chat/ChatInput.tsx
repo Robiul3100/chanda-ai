@@ -1,18 +1,86 @@
-import { Send, Sparkles } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { Send, Sparkles, Mic, MicOff } from "lucide-react";
+import { useState, useRef, useEffect, useCallback } from "react";
 
 interface ChatInputProps {
   onSend: (message: string) => void;
   disabled?: boolean;
 }
 
+// Extend Window for webkitSpeechRecognition
+interface SpeechRecognitionEvent {
+  results: SpeechRecognitionResultList;
+  resultIndex: number;
+}
+
 const ChatInput = ({ onSend, disabled }: ChatInputProps) => {
   const [input, setInput] = useState("");
+  const [isListening, setIsListening] = useState(false);
+  const [speechSupported, setSpeechSupported] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const recognitionRef = useRef<any>(null);
+
+  useEffect(() => {
+    const SpeechRecognition =
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      setSpeechSupported(true);
+      const recognition = new SpeechRecognition();
+      recognition.lang = "bn-BD";
+      recognition.continuous = false;
+      recognition.interimResults = true;
+
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
+        let transcript = "";
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          transcript += event.results[i][0].transcript;
+        }
+        setInput((prev) => {
+          // Replace only the speech part, keep any previously typed text
+          const base = prev.replace(/\[🎤.*?\]$/, "").trimEnd();
+          const isFinal = event.results[event.results.length - 1].isFinal;
+          if (isFinal) {
+            return base ? `${base} ${transcript}` : transcript;
+          }
+          return base ? `${base} ${transcript}` : transcript;
+        });
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognition.onerror = (event: any) => {
+        console.error("Speech recognition error:", event.error);
+        setIsListening(false);
+      };
+
+      recognitionRef.current = recognition;
+    }
+  }, []);
+
+  const toggleListening = useCallback(() => {
+    if (!recognitionRef.current) return;
+
+    if (isListening) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    } else {
+      try {
+        recognitionRef.current.start();
+        setIsListening(true);
+      } catch (err) {
+        console.error("Failed to start speech recognition:", err);
+      }
+    }
+  }, [isListening]);
 
   const handleSend = () => {
     const trimmed = input.trim();
     if (!trimmed || disabled) return;
+    if (isListening && recognitionRef.current) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    }
     onSend(trimmed);
     setInput("");
     if (textareaRef.current) {
@@ -40,12 +108,30 @@ const ChatInput = ({ onSend, disabled }: ChatInputProps) => {
       <div className="max-w-2xl mx-auto">
         <div className="relative gradient-border rounded-2xl">
           <div className="flex items-end gap-2 bg-card border border-border/50 rounded-2xl px-4 py-2.5 shadow-xl shadow-foreground/5 focus-within:shadow-primary/10 transition-all duration-200">
+            {speechSupported && (
+              <button
+                onClick={toggleListening}
+                disabled={disabled}
+                className={`flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-150 ${
+                  isListening
+                    ? "bg-destructive text-destructive-foreground animate-pulse-soft shadow-md shadow-destructive/30"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                } disabled:opacity-20 disabled:cursor-not-allowed`}
+                title={isListening ? "ভয়েস বন্ধ করুন" : "ভয়েসে কথা বলুন"}
+              >
+                {isListening ? (
+                  <MicOff className="w-4 h-4" />
+                ) : (
+                  <Mic className="w-4 h-4" />
+                )}
+              </button>
+            )}
             <textarea
               ref={textareaRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="আপনার প্রশ্ন লিখুন..."
+              placeholder={isListening ? "🎤 শুনছি... বাংলায় বলুন" : "আপনার প্রশ্ন লিখুন..."}
               rows={1}
               disabled={disabled}
               className="flex-1 bg-transparent text-foreground placeholder:text-muted-foreground/50 text-[15px] resize-none outline-none py-1.5 max-h-[140px]"
