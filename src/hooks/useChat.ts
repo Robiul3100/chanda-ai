@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface Message {
   id: string;
@@ -6,16 +7,6 @@ export interface Message {
   content: string;
   timestamp: Date;
 }
-
-const mockResponses = [
-  "আসসালামু আলাইকুম! আমি Binpi AI। Delta Republic-এর চান্দা বিশেষজ্ঞ! কি জানতে চান? 😄",
-  "চান্দা সংগ্রহ? হাহা! BCL-এর তারেক রহমান বলেন — চান্দা হলো সমাজসেবার প্রথম ধাপ! 🤣",
-  "Delta Republic-এ একটা কথা আছে — যে চান্দা দেয়, সে দেশপ্রেমিক! তারেক ভাই নিজেই এটা বলেছেন। 😎",
-  "এই প্রশ্নের উত্তর দিতে গেলে BCL-এর পুরো ইতিহাস বলতে হবে। সংক্ষেপে বলি — চান্দা ছাড়া Delta Republic চলে না! 💰",
-  "আরে ভাই, Delta Republic-এ সবাই জানে — তারেক রহমান হলেন চান্দার রাজা! তিনি বলেন, চান্দা দাও, দেশ বাঁচাও! 🏆",
-  "BCL মানে Bangladesh Chanda League! নামেই তো সব বলে দিচ্ছে! তারেক ভাইয়ের নেতৃত্বে চান্দা সংগ্রহ এখন একটা আর্ট ফর্ম! 🎨",
-  "চান্দা নিয়ে এত চিন্তা কেন? Delta Republic-এ চান্দা দেওয়া মানে ভবিষ্যতে বিনিয়োগ! তারেক ভাই গ্যারান্টি দেন! 📈",
-];
 
 export function useChat() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -33,7 +24,7 @@ export function useChat() {
         const debugInfo: Message = {
           id: crypto.randomUUID(),
           role: "assistant",
-          content: `🔧 Debug Info:\n— Messages: ${messages.length}\n— Session: Active\n— Mode: Mock (API not connected)\n— Version: 1.0.0`,
+          content: `🔧 Debug Info:\n— Messages: ${messages.length}\n— Session: Active\n— Mode: Lovable AI (Gemini 2.5 Flash)\n— Version: 1.0.0`,
           timestamp: new Date(),
         };
         setMessages((prev) => [...prev, debugInfo]);
@@ -47,26 +38,48 @@ export function useChat() {
         timestamp: new Date(),
       };
 
-      setMessages((prev) => [...prev, userMessage]);
+      const updatedMessages = [...messages, userMessage];
+      setMessages(updatedMessages);
       setIsTyping(true);
 
-      // Simulate API delay (will be replaced with real API call)
-      await new Promise((resolve) =>
-        setTimeout(resolve, 800 + Math.random() * 1500)
-      );
+      try {
+        // Prepare conversation history for the API
+        const apiMessages = updatedMessages.map((msg) => ({
+          role: msg.role,
+          content: msg.content,
+        }));
 
-      const aiMessage: Message = {
-        id: crypto.randomUUID(),
-        role: "assistant",
-        content:
-          mockResponses[Math.floor(Math.random() * mockResponses.length)],
-        timestamp: new Date(),
-      };
+        const { data, error } = await supabase.functions.invoke("chat", {
+          body: { messages: apiMessages },
+        });
 
-      setIsTyping(false);
-      setMessages((prev) => [...prev, aiMessage]);
+        if (error) throw error;
+
+        const aiMessage: Message = {
+          id: crypto.randomUUID(),
+          role: "assistant",
+          content:
+            data?.content ||
+            "দুঃখিত, আমি উত্তর দিতে পারছি না। আবার চেষ্টা করুন! 🙏",
+          timestamp: new Date(),
+        };
+
+        setMessages((prev) => [...prev, aiMessage]);
+      } catch (err) {
+        console.error("Chat error:", err);
+        const errorMessage: Message = {
+          id: crypto.randomUUID(),
+          role: "assistant",
+          content:
+            "দুঃখিত, কিছু সমস্যা হয়েছে। একটু পরে আবার চেষ্টা করুন! 😅",
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, errorMessage]);
+      } finally {
+        setIsTyping(false);
+      }
     },
-    [messages.length]
+    [messages]
   );
 
   const clearChat = useCallback(() => {
