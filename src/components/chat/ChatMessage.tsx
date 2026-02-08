@@ -2,15 +2,17 @@ import { Copy, Check } from "lucide-react";
 import { useState } from "react";
 import BinpiLogo from "@/components/BinpiLogo";
 import StreamingText from "./StreamingText";
+import MessageReactions from "./MessageReactions";
 
 interface ChatMessageProps {
   role: "user" | "assistant";
   content: string;
   isStreaming?: boolean;
+  messageId: string;
   onStreamingComplete?: () => void;
 }
 
-const ChatMessage = ({ role, content, isStreaming = false, onStreamingComplete }: ChatMessageProps) => {
+const ChatMessage = ({ role, content, isStreaming = false, messageId, onStreamingComplete }: ChatMessageProps) => {
   const [copied, setCopied] = useState(false);
   const isUser = role === "user";
 
@@ -51,23 +53,28 @@ const ChatMessage = ({ role, content, isStreaming = false, onStreamingComplete }
           )}
         </div>
 
+        {/* Action bar for AI messages */}
         {!isUser && !isStreaming && (
-          <button
-            onClick={handleCopy}
-            className="absolute -bottom-7 left-0 opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center gap-1.5 text-[11px] text-muted-foreground hover:text-foreground px-2 py-1 rounded-lg hover:bg-secondary"
-          >
-            {copied ? (
-              <>
-                <Check className="w-3 h-3 text-primary" />
-                <span>কপি হয়েছে</span>
-              </>
-            ) : (
-              <>
-                <Copy className="w-3 h-3" />
-                <span>কপি</span>
-              </>
-            )}
-          </button>
+          <div className="flex items-center gap-1 mt-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200">
+            <button
+              onClick={handleCopy}
+              className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground px-2 py-1 rounded-lg hover:bg-secondary transition-all"
+            >
+              {copied ? (
+                <>
+                  <Check className="w-3 h-3 text-primary" />
+                  <span>কপি হয়েছে</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-3 h-3" />
+                  <span>কপি</span>
+                </>
+              )}
+            </button>
+            <div className="w-px h-4 bg-border/50" />
+            <MessageReactions messageId={messageId} />
+          </div>
         )}
       </div>
     </div>

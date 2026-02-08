@@ -93,6 +93,7 @@ const Index = () => {
             {messages.map((message) => (
               <ChatMessage
                 key={message.id}
+                messageId={message.id}
                 role={message.role}
                 content={message.content}
                 isStreaming={message.id === streamingMessageId}
