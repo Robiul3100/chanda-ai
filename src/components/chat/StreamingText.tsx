@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import MarkdownRenderer from "./MarkdownRenderer";
 
 interface StreamingTextProps {
   content: string;
@@ -7,52 +8,47 @@ interface StreamingTextProps {
 }
 
 const StreamingText = ({ content, isStreaming, onComplete }: StreamingTextProps) => {
-  const [displayedWords, setDisplayedWords] = useState<string[]>([]);
+  const [displayedContent, setDisplayedContent] = useState("");
   const [isComplete, setIsComplete] = useState(!isStreaming);
 
   useEffect(() => {
     if (!isStreaming) {
-      setDisplayedWords(content.split(/(\s+)/));
+      setDisplayedContent(content);
       setIsComplete(true);
       return;
     }
 
-    const words = content.split(/(\s+)/);
+    const chars = content.split("");
     let currentIndex = 0;
-    setDisplayedWords([]);
+    setDisplayedContent("");
     setIsComplete(false);
 
     const interval = setInterval(() => {
-      if (currentIndex < words.length) {
-        setDisplayedWords((prev) => [...prev, words[currentIndex]]);
-        currentIndex++;
+      // Reveal multiple characters at a time for speed
+      const chunkSize = 3;
+      if (currentIndex < chars.length) {
+        const nextChunk = chars.slice(currentIndex, currentIndex + chunkSize).join("");
+        setDisplayedContent((prev) => prev + nextChunk);
+        currentIndex += chunkSize;
       } else {
         clearInterval(interval);
         setIsComplete(true);
         onComplete?.();
       }
-    }, 30);
+    }, 15);
 
     return () => clearInterval(interval);
   }, [content, isStreaming, onComplete]);
 
   if (isComplete || !isStreaming) {
-    return <span className="whitespace-pre-wrap">{content}</span>;
+    return <MarkdownRenderer content={content} />;
   }
 
   return (
-    <span className="whitespace-pre-wrap">
-      {displayedWords.map((word, index) => (
-        <span
-          key={index}
-          className="animate-word-reveal inline"
-          style={{ animationDelay: `${index * 10}ms` }}
-        >
-          {word}
-        </span>
-      ))}
-      <span className="inline-block w-0.5 h-4 bg-primary ml-0.5 animate-pulse-soft align-middle" />
-    </span>
+    <div>
+      <MarkdownRenderer content={displayedContent} />
+      <span className="inline-block w-0.5 h-4 bg-primary ml-0.5 animate-pulse-soft align-middle rounded-full" />
+    </div>
   );
 };
 
