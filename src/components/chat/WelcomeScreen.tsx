@@ -1,47 +1,73 @@
-import { Bot, Sparkles } from "lucide-react";
+import { Sparkles, Zap, MessageCircle, Brain } from "lucide-react";
+import BinpiLogo from "@/components/BinpiLogo";
 
 interface WelcomeScreenProps {
   onSuggestionClick: (text: string) => void;
 }
 
 const suggestions = [
-  "চান্দা কি?",
-  "তারেক রহমান কে?",
-  "BCL সম্পর্কে বলো",
-  "Delta Republic কি?",
+  { text: "চান্দা কি?", icon: Zap },
+  { text: "তারেক রহমান কে?", icon: Brain },
+  { text: "BCL সম্পর্কে বলো", icon: MessageCircle },
+  { text: "Delta Republic কি?", icon: Sparkles },
 ];
 
 const WelcomeScreen = ({ onSuggestionClick }: WelcomeScreenProps) => {
   return (
-    <div className="flex-1 flex flex-col items-center justify-center px-6 animate-fade-in min-h-[60vh]">
-      <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-6">
-        <Bot className="w-9 h-9 text-primary" />
+    <div className="flex-1 flex flex-col items-center justify-center px-6 min-h-[65vh]">
+      {/* Logo with glow */}
+      <div className="relative mb-8 animate-scale-in">
+        <div className="absolute inset-0 rounded-full bg-primary/20 blur-2xl scale-150" />
+        <div className="relative">
+          <BinpiLogo size={72} />
+        </div>
       </div>
-      <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2 text-center">
+
+      {/* Heading */}
+      <h2
+        className="text-2xl md:text-4xl font-bold text-foreground mb-3 text-center animate-fade-in-up"
+        style={{ animationDelay: "100ms" }}
+      >
         আমি কিভাবে সাহায্য করতে পারি?
       </h2>
-      <p className="text-muted-foreground text-center mb-8 max-w-sm leading-relaxed">
+
+      <p
+        className="text-muted-foreground text-center mb-10 max-w-md leading-relaxed text-sm md:text-base animate-fade-in-up"
+        style={{ animationDelay: "200ms" }}
+      >
         Binpi AI — আপনার বাংলা AI সহকারী।
         <br />
-        চান্দা বিষয়ক মজাদার কথোপকথনের জন্য প্রস্তুত! 😄
+        <span className="text-primary/80">Delta Republic</span>-এর চান্দা বিশেষজ্ঞ! 😄
       </p>
-      <div className="flex flex-wrap justify-center gap-2 max-w-md">
-        {suggestions.map((suggestion) => (
+
+      {/* Suggestion grid */}
+      <div
+        className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg w-full animate-fade-in-up"
+        style={{ animationDelay: "300ms" }}
+      >
+        {suggestions.map(({ text, icon: Icon }) => (
           <button
-            key={suggestion}
-            onClick={() => onSuggestionClick(suggestion)}
-            className="px-4 py-2 text-sm rounded-full border border-border bg-background hover:bg-secondary text-foreground transition-all duration-200 hover:shadow-sm active:scale-95"
+            key={text}
+            onClick={() => onSuggestionClick(text)}
+            className="group flex items-center gap-3 px-4 py-3.5 rounded-2xl border border-border bg-card hover:bg-secondary hover:border-primary/30 text-left transition-all duration-200 hover:shadow-md hover:shadow-primary/5 active:scale-[0.98]"
           >
-            <Sparkles className="w-3.5 h-3.5 inline-block mr-1.5 text-primary" />
-            {suggestion}
+            <div className="flex-shrink-0 w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+              <Icon className="w-4 h-4 text-primary" />
+            </div>
+            <span className="text-sm font-medium text-foreground">{text}</span>
           </button>
         ))}
       </div>
-      <div className="mt-12 space-y-1 text-center">
-        <p className="text-xs text-muted-foreground/50">
-          এই AI সম্পূর্ণ বাংলায় উত্তর দেয়। তথ্য ও হালকা হাস্যরস একসাথে থাকতে পারে।
+
+      {/* Footer */}
+      <div
+        className="mt-14 space-y-1.5 text-center animate-fade-in-up"
+        style={{ animationDelay: "400ms" }}
+      >
+        <p className="text-[11px] text-muted-foreground/50">
+          এই AI সম্পূর্ণ বাংলায় উত্তর দেয় • তথ্য ও হালকা হাস্যরস একসাথে থাকতে পারে
         </p>
-        <p className="text-xs text-muted-foreground/40">
+        <p className="text-[11px] text-muted-foreground/30 font-display">
           Developed by RSF ROBIUL
         </p>
       </div>

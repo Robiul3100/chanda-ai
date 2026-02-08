@@ -1,12 +1,16 @@
-import { Bot, Copy, Check } from "lucide-react";
+import { Copy, Check } from "lucide-react";
 import { useState } from "react";
+import BinpiLogo from "@/components/BinpiLogo";
+import StreamingText from "./StreamingText";
 
 interface ChatMessageProps {
   role: "user" | "assistant";
   content: string;
+  isStreaming?: boolean;
+  onStreamingComplete?: () => void;
 }
 
-const ChatMessage = ({ role, content }: ChatMessageProps) => {
+const ChatMessage = ({ role, content, isStreaming = false, onStreamingComplete }: ChatMessageProps) => {
   const [copied, setCopied] = useState(false);
   const isUser = role === "user";
 
@@ -23,34 +27,44 @@ const ChatMessage = ({ role, content }: ChatMessageProps) => {
       }`}
     >
       {!isUser && (
-        <div className="flex-shrink-0 w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center mt-1">
-          <Bot className="w-4 h-4 text-primary" />
+        <div className="flex-shrink-0 mt-1">
+          <BinpiLogo size={28} />
         </div>
       )}
-      <div className={`group relative max-w-[80%]`}>
+
+      <div className={`group relative max-w-[85%] md:max-w-[75%]`}>
         <div
-          className={`px-4 py-2.5 rounded-2xl text-[15px] leading-relaxed whitespace-pre-wrap ${
+          className={`px-4 py-3 text-[15px] leading-relaxed ${
             isUser
-              ? "bg-chat-user text-chat-user-foreground rounded-br-md"
-              : "bg-chat-ai text-chat-ai-foreground rounded-bl-md"
+              ? "gradient-bg text-primary-foreground rounded-2xl rounded-br-md shadow-lg shadow-primary/20"
+              : "bg-card border border-border/50 text-card-foreground rounded-2xl rounded-bl-md shadow-sm"
           }`}
         >
-          {content}
+          {isUser ? (
+            <span className="whitespace-pre-wrap">{content}</span>
+          ) : (
+            <StreamingText
+              content={content}
+              isStreaming={isStreaming}
+              onComplete={onStreamingComplete}
+            />
+          )}
         </div>
-        {!isUser && (
+
+        {!isUser && !isStreaming && (
           <button
             onClick={handleCopy}
-            className="absolute -bottom-7 left-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+            className="absolute -bottom-7 left-0 opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center gap-1.5 text-[11px] text-muted-foreground hover:text-foreground px-2 py-1 rounded-lg hover:bg-secondary"
           >
             {copied ? (
               <>
-                <Check className="w-3 h-3" />
-                কপি হয়েছে
+                <Check className="w-3 h-3 text-primary" />
+                <span>কপি হয়েছে</span>
               </>
             ) : (
               <>
                 <Copy className="w-3 h-3" />
-                কপি
+                <span>কপি</span>
               </>
             )}
           </button>
