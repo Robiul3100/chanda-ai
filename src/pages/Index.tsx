@@ -85,28 +85,34 @@ const Index = () => {
         onNewChat={handleNewChat}
       />
 
-      <div className="flex-1 overflow-y-auto scrollbar-thin relative z-10">
-        {!hasMessages ? (
-          <WelcomeScreen onSuggestionClick={sendMessage} />
-        ) : (
-          <div className="px-4 py-5 space-y-7 pb-2">
-            {messages.map((message) => (
-              <ChatMessage
-                key={message.id}
-                messageId={message.id}
-                role={message.role}
-                content={message.content}
-                isStreaming={message.id === streamingMessageId}
-                onStreamingComplete={onStreamingComplete}
-              />
-            ))}
-            {isTyping && <TypingIndicator />}
-            <div ref={messagesEndRef} />
+      {hasMessages ? (
+        <>
+          <div className="flex-1 overflow-y-auto scrollbar-thin relative z-10">
+            <div className="px-4 py-5 space-y-7 pb-2">
+              {messages.map((message) => (
+                <ChatMessage
+                  key={message.id}
+                  messageId={message.id}
+                  role={message.role}
+                  content={message.content}
+                  isStreaming={message.id === streamingMessageId}
+                  onStreamingComplete={onStreamingComplete}
+                />
+              ))}
+              {isTyping && <TypingIndicator />}
+              <div ref={messagesEndRef} />
+            </div>
           </div>
-        )}
-      </div>
-
-      <ChatInput onSend={sendMessage} disabled={isTyping} />
+          <ChatInput onSend={sendMessage} disabled={isTyping} />
+        </>
+      ) : (
+        <div className="flex-1 flex flex-col items-center justify-center relative z-10">
+          <WelcomeScreen onSuggestionClick={sendMessage} />
+          <div className="w-full">
+            <ChatInput onSend={sendMessage} disabled={isTyping} />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
