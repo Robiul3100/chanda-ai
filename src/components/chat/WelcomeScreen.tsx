@@ -9,7 +9,7 @@ const suggestions = [
   { text: "চান্দা কি?", icon: Zap },
   { text: "তারেক রহমান কে?", icon: Brain },
   { text: "BCL সম্পর্কে বলো", icon: MessageCircle },
-  { text: "Delta Republic কি?", icon: Sparkles },
+  { text: "চান্দুদল কি?", icon: Sparkles },
 ];
 
 const WelcomeScreen = ({ onSuggestionClick }: WelcomeScreenProps) => {
@@ -25,11 +25,18 @@ const WelcomeScreen = ({ onSuggestionClick }: WelcomeScreenProps) => {
 
       {/* Heading */}
       <h2
-        className="text-2xl md:text-4xl font-bold text-foreground mb-3 text-center animate-fade-in-up"
+        className="text-2xl md:text-4xl font-bold text-foreground mb-2 text-center animate-fade-in-up"
         style={{ animationDelay: "100ms" }}
       >
-        আমি কিভাবে সাহায্য করতে পারি?
+        বিম্পির চান্দা জগতে আপনাকে স্বাগতম
       </h2>
+
+      <p
+        className="text-sm text-muted-foreground/60 text-center mb-1 animate-fade-in-up font-display"
+        style={{ animationDelay: "150ms" }}
+      >
+        Developed by : RSF ROBIUL
+      </p>
 
       <p
         className="text-muted-foreground text-center mb-10 max-w-md leading-relaxed text-sm md:text-base animate-fade-in-up"
@@ -37,7 +44,7 @@ const WelcomeScreen = ({ onSuggestionClick }: WelcomeScreenProps) => {
       >
         Binpi AI — আপনার বাংলা AI সহকারী।
         <br />
-        <span className="text-primary/80">Delta Republic</span>-এর চান্দা বিশেষজ্ঞ! 😄
+        <span className="text-primary/80">চান্দুদল</span>-এর চান্দা বিশেষজ্ঞ! 😄
       </p>
 
       {/* Suggestion grid */}
@@ -66,9 +73,6 @@ const WelcomeScreen = ({ onSuggestionClick }: WelcomeScreenProps) => {
       >
         <p className="text-[11px] text-muted-foreground/50">
           এই AI সম্পূর্ণ বাংলায় উত্তর দেয় • তথ্য ও হালকা হাস্যরস একসাথে থাকতে পারে
-        </p>
-        <p className="text-[11px] text-muted-foreground/30 font-display">
-          Developed by RSF ROBIUL
         </p>
       </div>
     </div>
