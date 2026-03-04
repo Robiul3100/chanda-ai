@@ -15,7 +15,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       const stored = localStorage.getItem("binpi-theme") as Theme;
       if (stored) return stored;
     }
-    return "light";
+    return "dark";
   });
 
   useEffect(() => {
