@@ -43,7 +43,7 @@ export function useChat() {
   }, []);
 
   const sendMessage = useCallback(
-    async (content: string) => {
+    async (content: string, mood?: string) => {
       // Handle commands
       if (content === "/clear" || content === "/reset") {
         setMessages([]);
@@ -104,7 +104,7 @@ export function useChat() {
         }));
 
         const { data, error } = await supabase.functions.invoke("chat", {
-          body: { messages: apiMessages },
+          body: { messages: apiMessages, mood },
         });
 
         if (error) throw error;
