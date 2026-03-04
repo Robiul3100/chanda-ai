@@ -1,6 +1,6 @@
 import { Copy, Check } from "lucide-react";
 import { useState } from "react";
-import BinpiLogo from "@/components/BinpiLogo";
+import aiAvatar from "@/assets/ai-avatar.jpg";
 import StreamingText from "./StreamingText";
 import MessageReactions from "./MessageReactions";
 
@@ -29,8 +29,14 @@ const ChatMessage = ({ role, content, isStreaming = false, messageId, onStreamin
       }`}
     >
       {!isUser && (
-        <div className="flex-shrink-0 mt-1">
-          <BinpiLogo size={28} />
+        <div className="flex-shrink-0 mt-1 relative group/avatar">
+          <div className="w-8 h-8 rounded-full overflow-hidden ring-2 ring-primary/30 shadow-md hover:ring-primary/60 transition-all duration-300 hover:scale-110 hover:rotate-6">
+            <img src={aiAvatar} alt="Binpi AI" className="w-full h-full object-cover" />
+          </div>
+          {/* Fun tooltip */}
+          <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-card border border-border px-2 py-0.5 rounded-lg text-[10px] text-muted-foreground opacity-0 group-hover/avatar:opacity-100 transition-opacity whitespace-nowrap shadow-lg pointer-events-none">
+            ওয়াফ! 🐕
+          </div>
         </div>
       )}
 
@@ -39,7 +45,7 @@ const ChatMessage = ({ role, content, isStreaming = false, messageId, onStreamin
           className={`px-4 py-3 text-[15px] leading-relaxed ${
             isUser
               ? "gradient-bg text-primary-foreground rounded-2xl rounded-br-md shadow-lg shadow-primary/20"
-              : "bg-card border border-border/50 text-card-foreground rounded-2xl rounded-bl-md shadow-sm"
+              : "bg-card border border-border/50 text-card-foreground rounded-2xl rounded-bl-md shadow-sm hover:shadow-md transition-shadow duration-300"
           }`}
         >
           {isUser ? (
@@ -63,7 +69,7 @@ const ChatMessage = ({ role, content, isStreaming = false, messageId, onStreamin
               {copied ? (
                 <>
                   <Check className="w-3 h-3 text-primary" />
-                  <span>কপি হয়েছে</span>
+                  <span>কপি হয়েছে ✨</span>
                 </>
               ) : (
                 <>
@@ -77,6 +83,14 @@ const ChatMessage = ({ role, content, isStreaming = false, messageId, onStreamin
           </div>
         )}
       </div>
+
+      {isUser && (
+        <div className="flex-shrink-0 mt-1">
+          <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-sm">
+            😎
+          </div>
+        </div>
+      )}
     </div>
   );
 };
