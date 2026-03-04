@@ -39,7 +39,7 @@ Deno.serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const { messages } = await req.json();
+    const { messages, mood } = await req.json();
 
     if (!messages || !Array.isArray(messages)) {
       return new Response(
@@ -51,9 +51,18 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Build the full messages array with system prompt
+    // Build mood instruction
+    const moodPrompts: Record<string, string> = {
+      smart: "তুমি এখন Smart Mode-এ। তথ্যবহুল ও বিশ্লেষণমূলক উত্তর দাও।",
+      savage: "তুমি এখন Savage Mode-এ। ঝাঁঝালো, রোস্ট করে উত্তর দাও কিন্তু সম্মান রাখো।",
+      meme: "তুমি এখন Meme Lord Mode-এ। প্রতিটা উত্তরে মিম রেফারেন্স, ফানি কমেন্ট আর ইমোজি দাও!",
+      genius: "তুমি এখন Genius Mode-এ। গভীর, দার্শনিক ও জ্ঞানগর্ভ উত্তর দাও।",
+      lazy: "তুমি এখন Lazy Mode-এ। অলস ভাবে ছোট ছোট উত্তর দাও। 'আচ্ছা', 'হুম' টাইপ শব্দ ব্যবহার করো।",
+    };
+    const moodInstruction = mood && moodPrompts[mood] ? `\n\n${moodPrompts[mood]}` : "";
+
     const fullMessages = [
-      { role: "system", content: SYSTEM_PROMPT },
+      { role: "system", content: SYSTEM_PROMPT + moodInstruction },
       ...messages,
     ];
 
