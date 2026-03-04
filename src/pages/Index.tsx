@@ -49,7 +49,7 @@ const Index = () => {
   const handleSend = (text: string) => {
     sounds.playSend();
     game.addXP(10);
-    sendMessage(text);
+    sendMessage(text, currentMood);
   };
 
   const handleStreamingComplete = () => {
