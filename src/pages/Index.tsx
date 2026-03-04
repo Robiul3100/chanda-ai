@@ -7,64 +7,76 @@ import TypingIndicator from "@/components/chat/TypingIndicator";
 import ChatSidebar from "@/components/chat/ChatSidebar";
 import { useChat } from "@/hooks/useChat";
 import { useChatHistory } from "@/hooks/useChatHistory";
+import { useGameification } from "@/hooks/useGameification";
+import { useSoundEffects } from "@/hooks/useSoundEffects";
+import { MoodType } from "@/hooks/useMood";
 
 const Index = () => {
   const {
-    messages,
-    isTyping,
-    conversationId,
-    streamingMessageId,
-    sendMessage,
-    clearChat,
-    loadConversation,
-    startNewChat,
-    onStreamingComplete,
+    messages, isTyping, conversationId, streamingMessageId,
+    sendMessage, clearChat, loadConversation, startNewChat, onStreamingComplete,
   } = useChat();
 
   const {
-    conversations,
-    loading: historyLoading,
-    deleteConversation,
-    refreshConversations,
+    conversations, loading: historyLoading,
+    deleteConversation, refreshConversations,
   } = useChatHistory();
+
+  const game = useGameification();
+  const sounds = useSoundEffects();
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [currentMood, setCurrentMood] = useState<MoodType>(() => {
+    return (localStorage.getItem("binpi-mood") as MoodType) || "meme";
+  });
+
+  const handleMoodChange = (mood: MoodType) => {
+    setCurrentMood(mood);
+    localStorage.setItem("binpi-mood", mood);
+  };
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
 
-  // Refresh sidebar when a new conversation is created
   useEffect(() => {
-    if (conversationId) {
-      refreshConversations();
-    }
+    if (conversationId) refreshConversations();
   }, [conversationId, refreshConversations]);
 
   const hasMessages = messages.length > 0;
 
-  const handleNewChat = () => {
-    startNewChat();
+  const handleSend = (text: string) => {
+    sounds.playSend();
+    game.addXP(10);
+    sendMessage(text, currentMood);
   };
 
-  const handleSelectConversation = (id: string) => {
-    loadConversation(id);
+  const handleStreamingComplete = () => {
+    sounds.playReceive();
+    game.addXP(5);
+    onStreamingComplete();
   };
+
+  const handleReaction = () => {
+    sounds.playReaction();
+    game.addXP(3);
+  };
+
+  const handleSelectConversation = (id: string) => loadConversation(id);
 
   const handleDeleteConversation = async (id: string) => {
     await deleteConversation(id);
-    if (conversationId === id) {
-      startNewChat();
-    }
+    if (conversationId === id) startNewChat();
   };
 
   return (
     <div className="flex flex-col h-screen max-w-3xl mx-auto bg-background relative">
-      {/* Ambient gradient background */}
+      {/* Ambient neon background */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-1/2 -right-1/2 w-full h-full bg-primary/[0.03] rounded-full blur-3xl" />
-        <div className="absolute -bottom-1/2 -left-1/2 w-full h-full bg-accent/[0.03] rounded-full blur-3xl" />
+        <div className="absolute -top-1/2 -right-1/2 w-full h-full bg-primary/[0.05] rounded-full blur-[100px]" />
+        <div className="absolute -bottom-1/2 -left-1/2 w-full h-full bg-accent/[0.04] rounded-full blur-[100px]" />
+        <div className="absolute top-1/4 left-1/4 w-1/2 h-1/2 bg-primary/[0.02] rounded-full blur-[80px] animate-pulse-soft" />
       </div>
 
       <ChatSidebar
@@ -74,7 +86,7 @@ const Index = () => {
         activeConversationId={conversationId}
         onSelectConversation={handleSelectConversation}
         onDeleteConversation={handleDeleteConversation}
-        onNewChat={handleNewChat}
+        onNewChat={startNewChat}
         loading={historyLoading}
       />
 
@@ -82,7 +94,18 @@ const Index = () => {
         onClearChat={clearChat}
         hasMessages={hasMessages}
         onToggleSidebar={() => setSidebarOpen(true)}
-        onNewChat={handleNewChat}
+        onNewChat={startNewChat}
+        currentMood={currentMood}
+        onMoodChange={handleMoodChange}
+        gameStats={{
+          xp: game.xp,
+          level: game.level,
+          streak: game.streak,
+          levelTitle: game.levelTitle,
+          progress: game.progress,
+          isVIP: game.isVIP,
+          totalMessages: game.totalMessages,
+        }}
       />
 
       {hasMessages ? (
@@ -96,20 +119,26 @@ const Index = () => {
                   role={message.role}
                   content={message.content}
                   isStreaming={message.id === streamingMessageId}
-                  onStreamingComplete={onStreamingComplete}
+                  onStreamingComplete={handleStreamingComplete}
+                  onReact={handleReaction}
                 />
               ))}
-              {isTyping && <TypingIndicator />}
+              {isTyping && <TypingIndicator mood={currentMood} />}
               <div ref={messagesEndRef} />
             </div>
           </div>
-          <ChatInput onSend={sendMessage} disabled={isTyping} />
+          <ChatInput onSend={handleSend} disabled={isTyping} />
         </>
       ) : (
         <div className="flex-1 flex flex-col items-center justify-center relative z-10">
-          <WelcomeScreen onSuggestionClick={sendMessage} />
+          <WelcomeScreen
+            onSuggestionClick={handleSend}
+            currentMood={currentMood}
+            level={game.level}
+            levelTitle={game.levelTitle}
+          />
           <div className="w-full">
-            <ChatInput onSend={sendMessage} disabled={isTyping} />
+            <ChatInput onSend={handleSend} disabled={isTyping} />
           </div>
         </div>
       )}

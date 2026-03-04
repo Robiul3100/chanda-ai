@@ -6,7 +6,6 @@ interface ChatInputProps {
   disabled?: boolean;
 }
 
-// Extend Window for webkitSpeechRecognition
 interface SpeechRecognitionEvent {
   results: SpeechRecognitionResultList;
   resultIndex: number;
@@ -35,32 +34,20 @@ const ChatInput = ({ onSend, disabled }: ChatInputProps) => {
           transcript += event.results[i][0].transcript;
         }
         setInput((prev) => {
-          // Replace only the speech part, keep any previously typed text
           const base = prev.replace(/\[🎤.*?\]$/, "").trimEnd();
           const isFinal = event.results[event.results.length - 1].isFinal;
-          if (isFinal) {
-            return base ? `${base} ${transcript}` : transcript;
-          }
           return base ? `${base} ${transcript}` : transcript;
         });
       };
 
-      recognition.onend = () => {
-        setIsListening(false);
-      };
-
-      recognition.onerror = (event: any) => {
-        console.error("Speech recognition error:", event.error);
-        setIsListening(false);
-      };
-
+      recognition.onend = () => setIsListening(false);
+      recognition.onerror = () => setIsListening(false);
       recognitionRef.current = recognition;
     }
   }, []);
 
   const toggleListening = useCallback(() => {
     if (!recognitionRef.current) return;
-
     if (isListening) {
       recognitionRef.current.stop();
       setIsListening(false);
@@ -68,9 +55,7 @@ const ChatInput = ({ onSend, disabled }: ChatInputProps) => {
       try {
         recognitionRef.current.start();
         setIsListening(true);
-      } catch (err) {
-        console.error("Failed to start speech recognition:", err);
-      }
+      } catch {}
     }
   }, [isListening]);
 
@@ -83,9 +68,7 @@ const ChatInput = ({ onSend, disabled }: ChatInputProps) => {
     }
     onSend(trimmed);
     setInput("");
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-    }
+    if (textareaRef.current) textareaRef.current.style.height = "auto";
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -107,23 +90,19 @@ const ChatInput = ({ onSend, disabled }: ChatInputProps) => {
     <div className="sticky bottom-0 px-3 pb-3 pt-2 bg-gradient-to-t from-background via-background/95 to-transparent">
       <div className="max-w-2xl mx-auto">
         <div className="relative gradient-border rounded-2xl">
-          <div className="flex items-end gap-2 bg-card border border-border/50 rounded-2xl px-4 py-2.5 shadow-xl shadow-foreground/5 focus-within:shadow-primary/10 transition-all duration-200">
+          <div className="flex items-end gap-2 glass-card rounded-2xl px-4 py-2.5 shadow-2xl shadow-primary/10 focus-within:neon-glow transition-all duration-300">
             {speechSupported && (
               <button
                 onClick={toggleListening}
                 disabled={disabled}
                 className={`flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-150 ${
                   isListening
-                    ? "bg-destructive text-destructive-foreground animate-pulse-soft shadow-md shadow-destructive/30"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                    ? "bg-destructive text-destructive-foreground animate-pulse-soft shadow-md shadow-destructive/30 neon-glow"
+                    : "text-muted-foreground hover:text-foreground hover:bg-secondary"
                 } disabled:opacity-20 disabled:cursor-not-allowed`}
                 title={isListening ? "ভয়েস বন্ধ করুন" : "ভয়েসে কথা বলুন"}
               >
-                {isListening ? (
-                  <MicOff className="w-4 h-4" />
-                ) : (
-                  <Mic className="w-4 h-4" />
-                )}
+                {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
               </button>
             )}
             <textarea
@@ -131,15 +110,15 @@ const ChatInput = ({ onSend, disabled }: ChatInputProps) => {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={isListening ? "🎤 শুনছি... বাংলায় বলুন" : "আপনার প্রশ্ন লিখুন..."}
+              placeholder={isListening ? "🎤 শুনছি... বাংলায় বলুন" : "বিম্পিকে কিছু জিজ্ঞেস করো... 🐕"}
               rows={1}
               disabled={disabled}
-              className="flex-1 bg-transparent text-foreground placeholder:text-muted-foreground/50 text-[15px] resize-none outline-none py-1.5 max-h-[140px]"
+              className="flex-1 bg-transparent text-foreground placeholder:text-muted-foreground/40 text-[15px] resize-none outline-none py-1.5 max-h-[140px]"
             />
             <button
               onClick={handleSend}
               disabled={!input.trim() || disabled}
-              className="flex-shrink-0 w-9 h-9 rounded-xl gradient-bg text-primary-foreground flex items-center justify-center disabled:opacity-20 disabled:cursor-not-allowed hover:opacity-90 active:scale-90 transition-all duration-150 shadow-md shadow-primary/30"
+              className="flex-shrink-0 w-10 h-10 rounded-xl gradient-bg text-primary-foreground flex items-center justify-center disabled:opacity-20 disabled:cursor-not-allowed hover:opacity-90 active:scale-90 transition-all duration-150 shadow-lg shadow-primary/40 neon-glow"
             >
               {disabled ? (
                 <Sparkles className="w-4 h-4 animate-pulse-soft" />
@@ -149,7 +128,7 @@ const ChatInput = ({ onSend, disabled }: ChatInputProps) => {
             </button>
           </div>
         </div>
-        <p className="text-center text-[11px] text-muted-foreground/35 mt-2.5 font-display">
+        <p className="text-center text-[11px] text-muted-foreground/30 mt-2.5 font-display">
           Binpi AI ভুল তথ্য দিতে পারে • গুরুত্বপূর্ণ বিষয়ে যাচাই করুন
         </p>
       </div>
