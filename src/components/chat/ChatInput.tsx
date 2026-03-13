@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 interface ChatInputProps {
   onSend: (message: string) => void;
   disabled?: boolean;
+  isRoastMode?: boolean;
 }
 
 interface SpeechRecognitionEvent {
@@ -11,7 +12,7 @@ interface SpeechRecognitionEvent {
   resultIndex: number;
 }
 
-const ChatInput = ({ onSend, disabled }: ChatInputProps) => {
+const ChatInput = ({ onSend, disabled, isRoastMode }: ChatInputProps) => {
   const [input, setInput] = useState("");
   const [isListening, setIsListening] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(false);
@@ -35,7 +36,6 @@ const ChatInput = ({ onSend, disabled }: ChatInputProps) => {
         }
         setInput((prev) => {
           const base = prev.replace(/\[🎤.*?\]$/, "").trimEnd();
-          const isFinal = event.results[event.results.length - 1].isFinal;
           return base ? `${base} ${transcript}` : transcript;
         });
       };
@@ -89,15 +89,15 @@ const ChatInput = ({ onSend, disabled }: ChatInputProps) => {
   return (
     <div className="sticky bottom-0 px-3 pb-3 pt-2 bg-gradient-to-t from-background via-background/95 to-transparent">
       <div className="max-w-2xl mx-auto">
-        <div className="relative gradient-border rounded-2xl">
-          <div className="flex items-end gap-2 glass-card rounded-2xl px-4 py-2.5 shadow-2xl shadow-primary/10 focus-within:neon-glow transition-all duration-300">
+        <div className={`relative gradient-border rounded-2xl ${isRoastMode ? "ring-1 ring-destructive/20" : ""}`}>
+          <div className="flex items-end gap-2 glass-card-strong rounded-2xl px-4 py-2.5 shadow-lg focus-within:shadow-xl transition-all duration-300">
             {speechSupported && (
               <button
                 onClick={toggleListening}
                 disabled={disabled}
                 className={`flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-150 ${
                   isListening
-                    ? "bg-destructive text-destructive-foreground animate-pulse-soft shadow-md shadow-destructive/30 neon-glow"
+                    ? "bg-destructive text-destructive-foreground animate-pulse-soft shadow-md shadow-destructive/20"
                     : "text-muted-foreground hover:text-foreground hover:bg-secondary"
                 } disabled:opacity-20 disabled:cursor-not-allowed`}
                 title={isListening ? "ভয়েস বন্ধ করুন" : "ভয়েসে কথা বলুন"}
@@ -110,7 +110,13 @@ const ChatInput = ({ onSend, disabled }: ChatInputProps) => {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={isListening ? "🎤 শুনছি... বাংলায় বলুন" : "বিম্পিকে কিছু জিজ্ঞেস করো... 🐕"}
+              placeholder={
+                isListening
+                  ? "🎤 শুনছি... বাংলায় বলুন"
+                  : isRoastMode
+                    ? "রোস্ট খাওয়ার জন্য কিছু লিখো... 🔥"
+                    : "বিম্পিকে কিছু জিজ্ঞেস করো... 🐕"
+              }
               rows={1}
               disabled={disabled}
               className="flex-1 bg-transparent text-foreground placeholder:text-muted-foreground/40 text-[15px] resize-none outline-none py-1.5 max-h-[140px]"
@@ -118,7 +124,9 @@ const ChatInput = ({ onSend, disabled }: ChatInputProps) => {
             <button
               onClick={handleSend}
               disabled={!input.trim() || disabled}
-              className="flex-shrink-0 w-10 h-10 rounded-xl gradient-bg text-primary-foreground flex items-center justify-center disabled:opacity-20 disabled:cursor-not-allowed hover:opacity-90 active:scale-90 transition-all duration-150 shadow-lg shadow-primary/40 neon-glow"
+              className={`flex-shrink-0 w-10 h-10 rounded-xl text-primary-foreground flex items-center justify-center disabled:opacity-20 disabled:cursor-not-allowed hover:opacity-90 active:scale-90 transition-all duration-150 shadow-lg ${
+                isRoastMode ? "bg-destructive shadow-destructive/25" : "gradient-bg-warm shadow-primary/20"
+              }`}
             >
               {disabled ? (
                 <Sparkles className="w-4 h-4 animate-pulse-soft" />
@@ -128,7 +136,7 @@ const ChatInput = ({ onSend, disabled }: ChatInputProps) => {
             </button>
           </div>
         </div>
-        <p className="text-center text-[11px] text-muted-foreground/30 mt-2.5 font-display">
+        <p className="text-center text-[11px] text-muted-foreground/25 mt-2 font-display">
           Binpi AI ভুল তথ্য দিতে পারে • গুরুত্বপূর্ণ বিষয়ে যাচাই করুন
         </p>
       </div>

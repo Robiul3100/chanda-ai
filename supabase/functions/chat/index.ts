@@ -28,7 +28,6 @@ const SYSTEM_PROMPT = `তুমি Binpi AI, একটি বুদ্ধিম
 তুমি Binpi AI — চান্দুদল-এর চান্দা বিশেষজ্ঞ! Developed by RSF ROBIUL.`;
 
 Deno.serve(async (req) => {
-  // Handle CORS preflight
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -51,13 +50,13 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Build mood instruction
     const moodPrompts: Record<string, string> = {
       smart: "তুমি এখন Smart Mode-এ। তথ্যবহুল ও বিশ্লেষণমূলক উত্তর দাও।",
       savage: "তুমি এখন Savage Mode-এ। ঝাঁঝালো, রোস্ট করে উত্তর দাও কিন্তু সম্মান রাখো।",
       meme: "তুমি এখন Meme Lord Mode-এ। প্রতিটা উত্তরে মিম রেফারেন্স, ফানি কমেন্ট আর ইমোজি দাও!",
       genius: "তুমি এখন Genius Mode-এ। গভীর, দার্শনিক ও জ্ঞানগর্ভ উত্তর দাও।",
       lazy: "তুমি এখন Lazy Mode-এ। অলস ভাবে ছোট ছোট উত্তর দাও। 'আচ্ছা', 'হুম' টাইপ শব্দ ব্যবহার করো।",
+      roast: "তুমি এখন Roast Mode-এ! ইউজারকে মজার ভাবে রোস্ট করো — ব্যঙ্গাত্মক, হাস্যরসপূর্ণ ও চমকপ্রদ উত্তর দাও। 'ভাই তোমার প্রশ্ন শুনে আমার AI ব্রেইন হ্যাং হয়ে গেল 😂🔥' এই ধরনের টোন ব্যবহার করো। কিন্তু কখনো আঘাতমূলক, অশ্লীল বা ঘৃণাত্মক কিছু বলবে না। রোস্ট ফানি ও সম্মানজনক রাখো।",
     };
     const moodInstruction = mood && moodPrompts[mood] ? `\n\n${moodPrompts[mood]}` : "";
 
@@ -76,7 +75,7 @@ Deno.serve(async (req) => {
         model: "google/gemini-2.5-flash",
         messages: fullMessages,
         max_tokens: 1024,
-        temperature: 0.8,
+        temperature: mood === "roast" ? 0.95 : 0.8,
       }),
     });
 
