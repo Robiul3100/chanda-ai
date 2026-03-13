@@ -15,13 +15,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       const stored = localStorage.getItem("binpi-theme") as Theme;
       if (stored) return stored;
     }
-    return "dark";
+    return "light"; // Default to light mode
   });
 
   useEffect(() => {
     const root = document.documentElement;
-    
-    // Add transition class for smooth theme switch
     root.classList.add("theme-transition");
     
     if (theme === "dark") {
@@ -32,7 +30,6 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     
     localStorage.setItem("binpi-theme", theme);
     
-    // Remove transition class after animation completes
     const timeout = setTimeout(() => {
       root.classList.remove("theme-transition");
     }, 350);

@@ -11,9 +11,10 @@ interface ChatMessageProps {
   messageId: string;
   onStreamingComplete?: () => void;
   onReact?: () => void;
+  isRoastMode?: boolean;
 }
 
-const ChatMessage = ({ role, content, isStreaming = false, messageId, onStreamingComplete, onReact }: ChatMessageProps) => {
+const ChatMessage = ({ role, content, isStreaming = false, messageId, onStreamingComplete, onReact, isRoastMode }: ChatMessageProps) => {
   const [copied, setCopied] = useState(false);
   const isUser = role === "user";
 
@@ -31,11 +32,13 @@ const ChatMessage = ({ role, content, isStreaming = false, messageId, onStreamin
     >
       {!isUser && (
         <div className="flex-shrink-0 mt-1 relative group/avatar">
-          <div className="w-9 h-9 rounded-full overflow-hidden ring-2 ring-primary/40 shadow-lg shadow-primary/20 hover:ring-primary/70 transition-all duration-300 hover:scale-110 hover:rotate-6 neon-glow">
+          <div className={`w-9 h-9 rounded-full overflow-hidden ring-2 shadow-lg transition-all duration-300 hover:scale-110 hover:rotate-6 ${
+            isRoastMode ? "ring-destructive/40 shadow-destructive/15" : "ring-primary/30 shadow-primary/10"
+          }`}>
             <img src={aiAvatar} alt="Binpi AI" className="w-full h-full object-cover" />
           </div>
-          <div className="absolute -top-9 left-1/2 -translate-x-1/2 glass-card px-2.5 py-1 rounded-xl text-[10px] text-foreground opacity-0 group-hover/avatar:opacity-100 transition-opacity whitespace-nowrap shadow-lg pointer-events-none">
-            ওয়াফ! 🐕✨
+          <div className="absolute -top-9 left-1/2 -translate-x-1/2 glass-card-strong px-2.5 py-1 rounded-xl text-[10px] text-foreground opacity-0 group-hover/avatar:opacity-100 transition-opacity whitespace-nowrap shadow-lg pointer-events-none">
+            {isRoastMode ? "রোস্ট করবো! 🔥" : "ওয়াফ! 🐕✨"}
           </div>
         </div>
       )}
@@ -44,8 +47,10 @@ const ChatMessage = ({ role, content, isStreaming = false, messageId, onStreamin
         <div
           className={`px-4 py-3 text-[15px] leading-relaxed ${
             isUser
-              ? "gradient-bg text-primary-foreground rounded-[1.25rem] rounded-br-md shadow-lg shadow-primary/30 neon-glow"
-              : "glass-card text-card-foreground rounded-[1.25rem] rounded-bl-md shadow-lg shadow-primary/5 hover:shadow-primary/15 transition-shadow duration-300"
+              ? "gradient-bg-warm text-primary-foreground rounded-[1.25rem] rounded-br-md shadow-lg shadow-primary/15"
+              : `glass-card text-card-foreground rounded-[1.25rem] rounded-bl-md shadow-md ${
+                  isRoastMode ? "border-destructive/15" : ""
+                }`
           }`}
         >
           {isUser ? (
@@ -59,7 +64,6 @@ const ChatMessage = ({ role, content, isStreaming = false, messageId, onStreamin
           )}
         </div>
 
-        {/* Action bar for AI messages */}
         {!isUser && !isStreaming && (
           <div className="flex items-center gap-1 mt-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200">
             <button
@@ -86,7 +90,7 @@ const ChatMessage = ({ role, content, isStreaming = false, messageId, onStreamin
 
       {isUser && (
         <div className="flex-shrink-0 mt-1">
-          <div className="w-9 h-9 rounded-full gradient-bg flex items-center justify-center text-sm shadow-lg shadow-primary/30 neon-glow">
+          <div className="w-9 h-9 rounded-full gradient-bg-warm flex items-center justify-center text-sm shadow-lg shadow-primary/15">
             😎
           </div>
         </div>
