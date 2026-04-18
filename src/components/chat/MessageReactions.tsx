@@ -39,16 +39,19 @@ const MessageReactions = ({ messageId, onReact }: MessageReactionsProps) => {
         <button
           key={r.id}
           onClick={() => handleReaction(r.id)}
-          className={`relative w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-200 active:scale-75 ${
+          className={`relative w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200 active:scale-75 ${
             reaction === r.id
-              ? "bg-primary/15 scale-110"
-              : "hover:bg-secondary hover:scale-105"
+              ? "bg-primary/15 scale-110 shadow-soft"
+              : "hover:bg-secondary/60 hover:scale-110"
           }`}
           title={r.label}
         >
-          <span className={`text-sm ${reaction === r.id ? "text-lg" : ""}`}>{r.emoji}</span>
+          <span className={`text-sm leading-none ${reaction === r.id ? "text-base" : ""}`}>{r.emoji}</span>
           {showPop === r.id && (
-            <span className="absolute -top-4 left-1/2 -translate-x-1/2 text-2xl pointer-events-none" style={{ animation: "emoji-burst 0.6s ease-out forwards" }}>
+            <span
+              className="absolute -top-4 left-1/2 -translate-x-1/2 text-2xl pointer-events-none"
+              style={{ animation: "emoji-burst 0.6s ease-out forwards" }}
+            >
               {r.emoji}
             </span>
           )}
