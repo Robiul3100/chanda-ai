@@ -23,70 +23,96 @@ interface ChatHeaderProps {
   };
 }
 
-const ChatHeader = ({ onClearChat, hasMessages, onToggleSidebar, onNewChat, currentMood, onMoodChange, gameStats }: ChatHeaderProps) => {
+const IconBtn = ({
+  onClick,
+  label,
+  children,
+  variant = "default",
+}: {
+  onClick: () => void;
+  label: string;
+  children: React.ReactNode;
+  variant?: "default" | "danger";
+}) => (
+  <button
+    onClick={onClick}
+    aria-label={label}
+    className={`w-9 h-9 rounded-2xl flex items-center justify-center transition-all duration-200 active:scale-90 ${
+      variant === "danger"
+        ? "text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+        : "text-muted-foreground hover:text-foreground hover:bg-secondary/70"
+    }`}
+  >
+    {children}
+  </button>
+);
+
+const ChatHeader = ({
+  onClearChat,
+  hasMessages,
+  onToggleSidebar,
+  onNewChat,
+  currentMood,
+  onMoodChange,
+  gameStats,
+}: ChatHeaderProps) => {
   const { theme, toggleTheme } = useTheme();
   const isRoast = currentMood === "roast";
 
   return (
-    <header className={`sticky top-0 z-20 flex items-center justify-between px-3 py-2.5 glass-card-strong border-b border-border/20 ${isRoast ? "border-b-destructive/20" : ""}`}>
-      <div className="flex items-center gap-2">
-        <button
-          onClick={onToggleSidebar}
-          className="w-9 h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-200 active:scale-90"
-          aria-label="Toggle sidebar"
-        >
-          <Menu className="w-[18px] h-[18px]" />
-        </button>
-        
-        <div className="flex items-center gap-2.5">
-          <div className="relative">
-            <div className={`w-9 h-9 rounded-full overflow-hidden ring-2 shadow-lg hover:scale-110 transition-all ${
-              isRoast ? "ring-destructive/50 shadow-destructive/20" : "ring-primary/30 shadow-primary/15"
-            }`}>
-              <img src={aiAvatar} alt="Binpi AI" className="w-full h-full object-cover" />
+    <header
+      className={`sticky top-0 z-20 px-3 pt-safe py-2.5 glass-floating border-b ${
+        isRoast ? "border-destructive/15" : "border-border/30"
+      }`}
+    >
+      <div className="flex items-center justify-between gap-2">
+        {/* Left */}
+        <div className="flex items-center gap-1.5 min-w-0">
+          <IconBtn onClick={onToggleSidebar} label="Toggle sidebar">
+            <Menu className="w-[18px] h-[18px]" />
+          </IconBtn>
+
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="relative flex-shrink-0">
+              <div
+                className={`w-9 h-9 rounded-full overflow-hidden ring-2 shadow-soft ${
+                  isRoast ? "ring-destructive/40" : "ring-primary/30"
+                }`}
+              >
+                <img src={aiAvatar} alt="Binpi AI" className="w-full h-full object-cover" />
+              </div>
+              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-background animate-pulse" />
             </div>
-            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-500 border-2 border-background animate-pulse" />
-          </div>
-          <div>
-            <h1 className="text-base font-bold text-foreground tracking-tight font-display leading-none">
-              Binpi AI {isRoast ? "🔥" : "🐕"}
-            </h1>
-            <p className="text-[10px] text-muted-foreground/60 leading-none mt-0.5">
-              {isRoast ? "রোস্ট মাস্টার • অনলাইন 🟢" : "চান্দা বিশেষজ্ঞ • অনলাইন 🟢"}
-            </p>
+            <div className="min-w-0">
+              <h1 className="text-base font-bold text-foreground tracking-tight font-serif-display leading-none truncate">
+                Binpi {isRoast ? "🔥" : "🐕"}
+              </h1>
+              <p className="text-[10px] text-muted-foreground/70 leading-none mt-1 truncate">
+                {isRoast ? "রোস্ট মাস্টার" : "চান্দা বিশেষজ্ঞ"} • অনলাইন
+              </p>
+            </div>
           </div>
         </div>
-      </div>
-      
-      <div className="flex items-center gap-1">
-        <GameStats {...gameStats} />
-        <MoodToggle currentMood={currentMood} onMoodChange={onMoodChange} />
 
-        <button
-          onClick={toggleTheme}
-          className="w-9 h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-200 active:scale-90"
-          aria-label="Toggle theme"
-        >
-          {theme === "dark" ? <Sun className="w-[16px] h-[16px]" /> : <Moon className="w-[16px] h-[16px]" />}
-        </button>
-        
-        <button
-          onClick={onNewChat}
-          className="w-9 h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-200 active:scale-90"
-          aria-label="New chat"
-        >
-          <Plus className="w-[18px] h-[18px]" />
-        </button>
-        
-        {hasMessages && (
-          <button
-            onClick={onClearChat}
-            className="w-9 h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all duration-200 active:scale-90"
-            aria-label="Clear chat"
-          >
-            <Trash2 className="w-[18px] h-[18px]" />
-          </button>
-        )}
+        {/* Right */}
+        <div className="flex items-center gap-0.5 flex-shrink-0">
+          <GameStats {...gameStats} />
+          <MoodToggle currentMood={currentMood} onMoodChange={onMoodChange} />
+
+          <IconBtn onClick={toggleTheme} label="Toggle theme">
+            {theme === "dark" ? <Sun className="w-[16px] h-[16px]" /> : <Moon className="w-[16px] h-[16px]" />}
+          </IconBtn>
+
+          <IconBtn onClick={onNewChat} label="New chat">
+            <Plus className="w-[18px] h-[18px]" />
+          </IconBtn>
+
+          {hasMessages && (
+            <IconBtn onClick={onClearChat} label="Clear chat" variant="danger">
+              <Trash2 className="w-[16px] h-[16px]" />
+            </IconBtn>
+          )}
+        </div>
       </div>
     </header>
   );
